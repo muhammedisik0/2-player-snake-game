@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="">
+
+<head>
+    <meta charset="utf-8">
+    <title>Snake Game</title>
+
+    <!-- For Responsive -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Font Awesome -->
+    <script src="https://kit.fontawesome.com/99d5715eb3.js"></script>
+
+    <!-- CSS File -->
+    <link rel="stylesheet" href="2PSnakeGame.css">
+
+    <!-- jQuery -->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            cursor: default;
+            font-family: monospace;
+        }
+
+        body {
+            background-color: #000;
+        }
+
+        /* --- */
+
+        div.game-area {
+            margin: 10px auto;
+            width: 300px;
+            height: 300px;
+            border: 3px solid #edf5e1;
+            position: relative;
+            background-color: #000;
+            z-index: -1;
+        }
+
+        div.snake1 {
+            width: 15px;
+            height: 15px;
+            background-color: darkgreen;
+            z-index: 1;
+        }
+
+        div.snake2 {
+            width: 15px;
+            height: 15px;
+            background-color: dodgerblue;
+            z-index: 1;
+        }
+
+        div.food {
+            width: 15px;
+            height: 15px;
+            background-color: darkorange;
+            z-index: 0;
+        }
+
+        /* --- */
+
+        .countdown-point {
+            position: absolute;
+            width: 70px;
+            height: 30px;
+            border: 3px solid #edf5e1;
+            font-size: 20px;
+            text-align: center;
+            line-height: 30px;
+            color: #edf5e1;
+        }
+
+        /* --- */
+
+        span.p1 {
+            position: absolute;
+            left: -72px;
+            top: 32%;
+            font-size: 15px;
+            font-weight: 600;
+            color: #edf5e1
+        }
+
+        div.point1 {
+            left: -76px;
+            top: 37.5%;
+        }
+
+        span.p2 {
+            position: absolute;
+            right: -74px;
+            top: 32%;
+            font-size: 15px;
+            font-weight: 600;
+            color: #edf5e1;
+        }
+
+        div.point2 {
+            right: -76px;
+            top: 37.5%;
+        }
+
+        /* --- */
+
+        span.time {
+            position: absolute;
+            right: -63px;
+            top: 7%;
+            font-size: 17px;
+            font-weight: 600;
+            color: #edf5e1;
+        }
+
+        div.countdown {
+            right: -76px;
+            top: 12.5%;
+        }
+
+        /* --- */
+
+        span.to-start {
+            width: fit-content;
+            position: absolute;
+            margin: auto;
+            left: 0;
+            right: 0;
+            top: 102%;
+            font-size: 17px;
+            color: #edf5e1;
+        }
+
+    </style>
+
+</head>
+
+<body>
+    <div class="game-area">
+        <div class="snake1"></div>
+        <div class="snake2"></div>
+        <div class="food"></div>
+        <span class="time">Time:</span>
+        <div class="countdown countdown-point"></div>
+        <span class="p1">Player1:</span>
+        <div class="point1 countdown-point"></div>
+        <span class="p2">Player2:</span>
+        <div class="point2 countdown-point"></div>
+        <span class="to-start">&nbsp;Click 1 to play single!<br />Click 2 to play 2 players!</span>
+    </div>
+
+    <script>
+        $(document).ready(() => {
+
+            const coordinates = [0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225, 240, 255, 270, 285];
+            const move = 15;
+            var point1 = 0;
+            var point2 = 0;
+
+            const SNAKE1 = document.querySelector(".snake1");
+            const SNAKE2 = document.querySelector(".snake2");
+            const FOOD = document.querySelector(".food");
+
+            $(".snake1").css({
+                "position": "absolute",
+                "top": 90,
+                "left": 120,
+                "background-color": "transparent"
+            });
+            var locSnake1X = SNAKE1.style.left;
+            var locSnake1Y = SNAKE1.style.top;
+
+            $(".snake2").css({
+                "position": "absolute",
+                "top": 180,
+                "left": 120,
+                "background-color": "transparent"
+            });
+            var locSnake2X = SNAKE2.style.left;
+            var locSnake2Y = SNAKE2.style.top;
+
+            $(".food").css("background-color", "transparent");
+
+            var locFoodX, locFoodY;
+            const LocFoodUpdate = () => {
+                locFoodX = coordinates[Math.round(19 * Math.random())];
+                locFoodY = coordinates[Math.round(19 * Math.random())];
+                $(".food").css({
+                    "position": "absolute",
+                    "top": locFoodY,
+                    "left": locFoodX
+                });
+            }
+
+            const WhenEat = () => {
+                if ((parseInt(locSnake1X) === parseInt(locFoodX)) && (parseInt(locSnake1Y) === parseInt(locFoodY))) {
+                    point1 += 10;
+                    $(".point1").text(point1);
+                    LocFoodUpdate();
+                }
+                if ((parseInt(locSnake2X) === parseInt(locFoodX)) && (parseInt(locSnake2Y) === parseInt(locFoodY))) {
+                    point2 += 10;
+                    $(".point2").text(point2);
+                    LocFoodUpdate();
+                }
+            }
+
+            const a = () => {
+                if (parseInt(locSnake1X) === 0) {} else {
+                    locSnake1X = parseInt(locSnake1X) - move + "px";
+                    SNAKE1.style.left = locSnake1X;
+                    WhenEat();
+                }
+            }
+
+            const d = () => {
+                if (parseInt(locSnake1X) === 285) {} else {
+                    locSnake1X = parseInt(locSnake1X) + move + "px";
+                    SNAKE1.style.left = locSnake1X;
+                    WhenEat();
+                }
+            }
+
+            const w = () => {
+                if (parseInt(locSnake1Y) === 0) {} else {
+                    locSnake1Y = parseInt(locSnake1Y) - move + "px";
+                    SNAKE1.style.top = locSnake1Y;
+                    WhenEat();
+                }
+            }
+
+            const s = () => {
+                if (parseInt(locSnake1Y) === 285) {} else {
+                    locSnake1Y = parseInt(locSnake1Y) + move + "px";
+                    SNAKE1.style.top = locSnake1Y;
+                    WhenEat();
+                }
+            }
+
+            const ArrowLeft = () => {
+                if (parseInt(locSnake2X) === 0) {} else {
+                    locSnake2X = parseInt(locSnake2X) - move + "px";
+                    SNAKE2.style.left = locSnake2X;
+                    WhenEat();
+                }
+            }
+
+            const ArrowRight = () => {
+                if (parseInt(locSnake2X) === 285) {} else {
+                    locSnake2X = parseInt(locSnake2X) + move + "px";
+                    SNAKE2.style.left = locSnake2X;
+                    WhenEat();
+                }
+            }
+
+            const ArrowUp = () => {
+                if (parseInt(locSnake2Y) === 0) {} else {
+                    locSnake2Y = parseInt(locSnake2Y) - move + "px";
+                    SNAKE2.style.top = locSnake2Y;
+                    WhenEat();
+                }
+            }
+
+            const ArrowDown = () => {
+                if (parseInt(locSnake2Y) === 285) {} else {
+                    locSnake2Y = parseInt(locSnake2Y) + move + "px";
+                    SNAKE2.style.top = locSnake2Y;
+                    WhenEat();
+                }
+            }
+
+            const TwoPlayers = () => {
+                LocFoodUpdate();
+                point1 = 0;
+                point2 = 0;
+                $(".point1").text(0);
+                $(".point2").text(0);
+                $("span.to-start").hide();
+                $(".p1").show();
+                $(".point1").show();
+                $(".p2").text("Player2:");
+                $(".snake1").css("background-color", "forestgreen");
+                $(".snake2").css("background-color", "dodgerblue");
+                $(".food").css("background-color", "darkorange");
+
+                var time = 45;
+                $(".countdown").text(time);
+                const countdown = setInterval(() => {
+                    time -= 1;
+                    if (time <= 0) {
+                        clearInterval(countdown);
+                        LocFoodUpdate();
+                        $(".snake1").css("background-color", "transparent");
+                        $(".snake2").css("background-color", "transparent");
+                        $(".food").css("background-color", "transparent");
+                        $("span.to-start").show();
+                    }
+                    $(".countdown").text(time);
+                }, 1000);
+            }
+
+            const OnePlayer = () => {
+                LocFoodUpdate();
+                point2 = 0;
+                $(".point2").text(0);
+                $("span.to-start").hide();
+                $(".p1").hide();
+                $(".point1").hide();
+                $(".p2").text("Player1:");
+                $(".snake2").css("background-color", "forestgreen");
+                $(".food").css("background-color", "darkorange");
+
+                var time = 30;
+                $(".countdown").text(time);
+                const countdown = setInterval(() => {
+                    time -= 1;
+                    if (time <= 0) {
+                        clearInterval(countdown);
+                        LocFoodUpdate();
+                        $(".snake2").css("background-color", "transparent");
+                        $(".food").css("background-color", "transparent");
+                        $("span.to-start").show();
+                    }
+                    $(".countdown").text(time);
+                }, 1000);
+            }
+
+            const map = {
+                ArrowLeft: false,
+                ArrowRight: false,
+                ArrowUp: false,
+                ArrowDown: false,
+                a: false,
+                d: false,
+                w: false,
+                s: false
+            };
+
+            $(document).keydown((e) => {
+                var e = e || event;
+
+                if (e.key in map) {
+                    map[e.key] = true;
+                    if (map["a"]) {
+                        a();
+                    } else if (map["d"]) {
+                        d();
+                    } else if (map["w"]) {
+                        w();
+                    } else if (map["s"]) {
+                        s();
+                    }
+                    if (map["ArrowLeft"]) {
+                        ArrowLeft();
+                    } else if (map["ArrowRight"]) {
+                        ArrowRight();
+                    } else if (map["ArrowUp"]) {
+                        ArrowUp();
+                    } else if (map["ArrowDown"]) {
+                        ArrowDown();
+                    }
+                }
+                if (e.key === "1") {
+                    OnePlayer();
+                }
+                if (e.key === "2") {
+                    TwoPlayers();
+                }
+            });
+
+            $(document).keyup((e) => {
+                if (e.key in map) {
+                    map[e.key] = false;
+                }
+            });
+        });
+
+    </script>
+</body>
+
+</html>
